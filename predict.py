@@ -105,13 +105,16 @@ if __name__ == "__main__":
     in_files = args.input
     out_files = get_output_filenames(args)
 
-    net = UNet(n_channels=3, n_classes=1)
+    # yh
+    torch.cuda.set_device(3)
+
+    net = UNet(n_channels=1, n_classes=1)
 
     logging.info("Loading model {}".format(args.model))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    logging.info(f'Using device {device}')
-    net.to(deviec=device)
+    logging.info('Using device {device}')
+    net.to(device=device)
     net.load_state_dict(torch.load(args.model, map_location=device))
 
     logging.info("Model loaded !")

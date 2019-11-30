@@ -13,9 +13,11 @@ from eval import eval_net
 from unet import UNet
 from utils import get_ids, split_train_val, get_imgs_and_masks, batch
 
-dir_img = 'data/imgs/'
-dir_mask = 'data/masks/'
-dir_checkpoint = 'checkpoints/'
+#os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
+dir_img = '/home/yinhuan/Data/radar_exp/11.30/train_images/'
+dir_mask = '/home/yinhuan/Data/radar_exp/11.30/train_labels/'
+dir_checkpoint = '/home/yinhuan/Data/radar_exp/11.30/pytorch_check/'
 
 
 def train_net(net,
@@ -30,7 +32,7 @@ def train_net(net,
 
     iddataset = split_train_val(ids, val_percent)
 
-    logging.info(f'''Starting training:
+    logging.info('''Starting training:
         Epochs:          {epochs}
         Batch size:      {batch_size}
         Learning rate:   {lr}
@@ -54,7 +56,7 @@ def train_net(net,
         val = get_imgs_and_masks(iddataset['val'], dir_img, dir_mask, img_scale)
 
         epoch_loss = 0
-        with tqdm(total=n_train, desc=f'Epoch {epoch + 1}/{epochs}', unit='img') as pbar:
+        with tqdm(total=n_train, desc='Epoch {epoch + 1}/{epochs}', unit='img') as pbar:
             for i, b in enumerate(batch(train, batch_size)):
                 imgs = np.array([i[0] for i in b]).astype(np.float32)
                 true_masks = np.array([i[1] for i in b])
@@ -84,8 +86,8 @@ def train_net(net,
             except OSError:
                 pass
             torch.save(net.state_dict(),
-                       dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
-            logging.info(f'Checkpoint {epoch + 1} saved !')
+                       dir_checkpoint + 'radar_segmentation.pth')
+            logging.info('radar_segmentation saved !')
 
         val_dice = eval_net(net, val, device, n_val)
         logging.info('Validation Dice Coeff: {}'.format(val_dice))
@@ -114,8 +116,8 @@ def pretrain_checks():
     imgs = [f for f in os.listdir(dir_img) if not f.startswith('.')]
     masks = [f for f in os.listdir(dir_mask) if not f.startswith('.')]
     if len(imgs) != len(masks):
-        logging.warning(f'The number of images and masks do not match ! '
-                        f'{len(imgs)} images and {len(masks)} masks detected in the data folder.')
+        logging.warning('The number of images and masks do not match ! '
+                        '{len(imgs)} images and {len(masks)} masks detected in the data folder.')
 
 
 if __name__ == '__main__':
@@ -123,7 +125,10 @@ if __name__ == '__main__':
     args = get_args()
     pretrain_checks()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    logging.info(f'Using device {device}')
+    logging.info('Using device {device}')
+
+    # yh
+    torch.cuda.set_device(2)
 
     # Change here to adapt to your data
     # n_channels=3 for RGB images
@@ -131,17 +136,17 @@ if __name__ == '__main__':
     #   - For 1 class and background, use n_classes=1
     #   - For 2 classes, use n_classes=1
     #   - For N > 2 classes, use n_classes=N
-    net = UNet(n_channels=3, n_classes=1)
-    logging.info(f'Network:\n'
-                 f'\t{net.n_channels} input channels\n'
-                 f'\t{net.n_classes} output channels (classes)\n'
-                 f'\t{"Bilinear" if net.bilinear else "Dilated conv"} upscaling')
+    net = UNet(n_channels=1, n_classes=1)
+    logging.info('Network:\n'
+                 '\t{net.n_channels} input channels\n'
+                 '\t{net.n_classes} output channels (classes)\n'
+                 '\t{"Bilinear" if net.bilinear else "Dilated conv"} upscaling')
 
     if args.load:
         net.load_state_dict(
             torch.load(args.load, map_location=device)
         )
-        logging.info(f'Model loaded from {args.load}')
+        logging.info('Model loaded from {args.load}')
 
     net.to(device=device)
     # faster convolutions, but more memory
