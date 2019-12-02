@@ -1,1 +1,1 @@
-python3 train.py -e 1 -b 1 -l 0.00001 -s 1.0 -v 10
+python3 train.py -e 10 -b 128 -l 0.0001 -s 0.1 -v 10

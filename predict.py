@@ -11,6 +11,10 @@ from unet import UNet
 from utils import plot_img_and_mask
 from utils import resize_and_crop, normalize, hwc_to_chw, dense_crf
 
+import sys
+
+logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+                    level=logging.INFO)
 
 def predict_img(net,
                 full_img,
@@ -59,8 +63,7 @@ def get_args():
                         metavar='FILE',
                         help="Specify the file in which the model is stored")
     parser.add_argument('--input', '-i', metavar='INPUT', nargs='+',
-                        help='filenames of input images', required=True)
-
+                        help='filenames of input images')
     parser.add_argument('--output', '-o', metavar='INPUT', nargs='+',
                         help='Filenames of ouput images')
     parser.add_argument('--viz', '-v', action='store_true',
@@ -75,23 +78,34 @@ def get_args():
     parser.add_argument('--scale', '-s', type=float,
                         help="Scale factor for the input images",
                         default=0.5)
-
+    parser.add_argument('--input_file', '-if',
+                        help='filename of input image names') # yh
+    parser.add_argument('--output_file', '-of',
+                        help='filename of output image names') # yh
     return parser.parse_args()
 
 
 def get_output_filenames(args):
-    in_files = args.input
+    # in_files = args.input
+
+    with open(args.input_file) as file:
+        in_files = file.read().splitlines()
+
     out_files = []
 
-    if not args.output:
-        for f in in_files:
-            pathsplit = os.path.splitext(f)
-            out_files.append("{}_OUT{}".format(pathsplit[0], pathsplit[1]))
-    elif len(in_files) != len(args.output):
-        logging.error("Input files and output files are not of the same length")
-        raise SystemExit()
-    else:
-        out_files = args.output
+    # if not args.output:
+    #     for f in in_files:
+    #         pathsplit = os.path.splitext(f)
+    #         out_files.append("{}_OUT{}".format(pathsplit[0], pathsplit[1]))
+    # elif len(in_files) != len(args.output):
+    #     logging.error("Input files and output files are not of the same length")
+    #     raise SystemExit()
+    # else:
+    #     with open(args.output_file) as file_:
+    #         out_files = file_.read().splitlines()
+
+    with open(args.output_file) as file_:
+        out_files = file_.read().splitlines()
 
     return out_files
 
@@ -102,11 +116,15 @@ def mask_to_image(mask):
 
 if __name__ == "__main__":
     args = get_args()
-    in_files = args.input
+
+    with open(args.input_file) as file:
+        in_files = file.read().splitlines() 
+
+    # in_files = args.input
     out_files = get_output_filenames(args)
 
     # yh
-    torch.cuda.set_device(3)
+    torch.cuda.set_device(1)
 
     net = UNet(n_channels=1, n_classes=1)
 

@@ -46,6 +46,7 @@ def train_net(net,
     n_train = len(iddataset['train'])
     n_val = len(iddataset['val'])
     optimizer = optim.Adam(net.parameters(), lr=lr)
+    #optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.75)
     criterion = nn.BCELoss()
 
     for epoch in range(epochs):
