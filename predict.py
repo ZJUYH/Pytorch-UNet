@@ -53,8 +53,9 @@ def predict_img(net,
     if use_dense_crf:
         full_mask = dense_crf(np.array(full_img).astype(np.uint8), full_mask)
 
-    return full_mask > out_threshold
-
+    # return full_mask > out_threshold 
+    # yh
+    return full_mask
 
 def get_args():
     parser = argparse.ArgumentParser(description='Predict masks from input images',
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     out_files = get_output_filenames(args)
 
     # yh
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(2)
 
     net = UNet(n_channels=1, n_classes=1)
 

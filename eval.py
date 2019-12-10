@@ -21,6 +21,6 @@ def eval_net(net, dataset, device, n_val):
 
         mask_pred = net(img).squeeze(dim=0)
 
-        mask_pred = (mask_pred > 0.5).float()
+        mask_pred = (mask_pred > 0.99).float()
         tot += dice_coeff(mask_pred, true_mask.squeeze(dim=1)).item()
     return tot / n_val

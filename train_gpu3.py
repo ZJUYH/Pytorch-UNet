@@ -87,8 +87,8 @@ def train_net(net,
             except OSError:
                 pass
             torch.save(net.state_dict(),
-                       dir_checkpoint + 'radar_segmentation.pth')
-            logging.info('radar_segmentation saved !')
+                       dir_checkpoint + 'gpu_3.pth')
+            logging.info('gpu_3 saved !')
 
         val_dice = eval_net(net, val, device, n_val)
         logging.info('Validation Dice Coeff: {}'.format(val_dice))
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     logging.info('Using device {device}')
 
     # yh
-    torch.cuda.set_device(2)
+    torch.cuda.set_device(3)
 
     # Change here to adapt to your data
     # n_channels=3 for RGB images
